@@ -76,6 +76,7 @@ module Devise
       def authenticate!
         return false unless (@password.present? || @allow_unauthenticated_bind)
         @ldap.auth(dn, @password)
+        @ldap.base = dn.split(',').keep_if { |x| x[0..2] == 'OU=' || x[0..2] == 'DC=' }.join(',')
         @ldap.bind
       end
 
