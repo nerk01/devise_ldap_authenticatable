@@ -26,6 +26,7 @@ module Devise
         @check_group_membership = ldap_config.has_key?("check_group_membership") ? ldap_config["check_group_membership"] : ::Devise.ldap_check_group_membership
         @required_groups = ldap_config["required_groups"]
         @required_attributes = ldap_config["require_attribute"]
+        @autotree = ldap_config["autotree"]
 
         @ldap.auth ldap_config["admin_user"], ldap_config["admin_password"] if params[:admin]
         @ldap.auth params[:login], params[:password] if ldap_config["admin_as_user"]
@@ -76,8 +77,12 @@ module Devise
       def authenticate!
         return false unless (@password.present? || @allow_unauthenticated_bind)
         @ldap.auth(dn, @password)
-        @ldap.base = dn.split(',').keep_if { |x| x[0..2] == 'OU=' || x[0..2] == 'DC=' }.join(',')
+        determine_tree if @autotree
         @ldap.bind
+      end
+
+      def determine_tree
+        @ldap.base = dn.split(',').keep_if { |x| x[0..2] == 'OU=' || x[0..2] == 'DC=' }.join(',')
       end
 
       def authenticated?
