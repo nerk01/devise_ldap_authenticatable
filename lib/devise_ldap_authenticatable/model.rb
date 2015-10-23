@@ -103,10 +103,10 @@ module Devise
           end
 
           if ::Devise.ldap_create_user && resource.new_record? && resource.valid_ldap_authentication?(attributes[:password])
-            resource.ldap_before_save if resource.respond_to?(:ldap_before_save)
+            resource.ldap_before_create if resource.respond_to?(:ldap_before_create)
             resource.save!
           end
-
+          
           resource
         end
 
